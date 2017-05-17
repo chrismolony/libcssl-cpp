@@ -8,12 +8,12 @@
 #include <string.h>
 
 #include "cssl.h"
-
+#define  FRAMELENGTH 32 //定义数据帧长度 字节
 //using namespace std;
 /* if it is time to finish */
 static int finished=0;
 static uint8_t pos=0;
-uint8_t data[32];
+uint8_t data[FRAMELENGTH];//
 static int data_already =0;
 /* example callback, it gets its id, buffer, and buffer length */
 static void callback(int id,
@@ -29,17 +29,20 @@ static void callback(int id,
 		data[i+pos] = buf[i];
 		//printf("0x%02x ",buf[i]);
     }
+	//记录位置
 	pos += length;
-	if(pos>=32){
+    //收到既定的一帧
+	if(pos>=FRAMELENGTH){
 		pos = 0;
 		data_already = 1;
 	}
+	//进行处理
 	if(data_already == 1){//
 	
-		for(i=0;i<32;i++)
+		for(i=0;i<FRAMELENGTH;i++)
 			printf("0x%02x ",data[i]);
-		memset(data,0,32);
-		data_already = 0 ;
+		memset(data,0,FRAMELENGTH);
+		data_already = 0 ;//数据包准备好信号置零
 		printf("\n");
 	}
 	
@@ -56,7 +59,7 @@ int main(int argc, char **argv)
 	memset(data,0,sizeof(data));
     myserial.cssl_start();
 	//test
-	printf("%d\n",1234^5678); 
+//	printf("%d\n",1234^5678); 
     serial=myserial.cssl_open("/dev/ttyUSB0",callback,0,
 		     115200,8,0,1);
 
@@ -67,7 +70,7 @@ int main(int argc, char **argv)
 		return -1;
     }
 
-    myserial.cssl_putstring(serial,"Type some data, ^D finishes.");
+ //   myserial.cssl_putstring(serial,"Type some data, ^D finishes.");
 	myserial.cssl_putstring(serial,"Sir this is a serial testing programer.");
 	
     while (true){
